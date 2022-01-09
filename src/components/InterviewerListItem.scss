@@ -11,6 +11,10 @@
       border-radius: 16px;
     }
 
+    &-name {
+      display: none;
+    }
+
     &--selected {
       color: $dark-background;
       background-color: $white;
@@ -27,6 +31,10 @@
       width: 28px;
       height: 28px;
       margin-right: 0.5rem;
+    }
+
+    &--selected &-name {
+      display: inline;
     }
 
     &--selected,
