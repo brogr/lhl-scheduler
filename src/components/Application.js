@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DayList from "./DayList";
 import Appointment from "./Appointment";
-import { getAppointmentsForDay } from "helpers/selectors";
+import { getAppointmentsForDay, getInterview } from "helpers/selectors";
 
 import "components/Application.scss";
 
@@ -86,10 +86,8 @@ export default function Application(props) {
     day: "Monday",
     days: [],
     appointments: {},
+    interviewers: {},
   });
-
-  // list of appointments for that day
-  const dailyAppointments = getAppointmentsForDay(state, state.day);
 
   // Aliased actions for combined state
   const setDay = (day) => setState({ ...state, day });
@@ -112,12 +110,21 @@ export default function Application(props) {
         interviewers: interviewers.data,
       }));
     });
-
   }, []);
 
-  const AppointmentList = dailyAppointments.map((appointment) => (
-    <Appointment key={appointment.id} {...appointment} />
-  ));
+  // list of appointments for this day
+  const dailyAppointments = getAppointmentsForDay(state, state.day);
+  // parse list of appointment
+  const AppointmentList = dailyAppointments.map((appointment) => {
+    const interview = getInterview(state, appointment.interview);
+    return (
+      <Appointment
+        key={appointment.id}
+        {...appointment}
+        interview={interview}
+      />
+    );
+  });
   AppointmentList.push(<Appointment key="last" time="5pm" />);
 
   return (

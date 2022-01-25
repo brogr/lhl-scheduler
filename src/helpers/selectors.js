@@ -1,4 +1,4 @@
-//... returns an array of appointments for that day
+// returns an array of appointments for that day
 export function getAppointmentsForDay(state, day) {
   // validate that days is set
   if (state.days !== undefined || state.days.length > 0) {
@@ -18,4 +18,19 @@ export function getAppointmentsForDay(state, day) {
   }
   // fallback: return empty array 
   return [];
+}
+
+// return a new object containing the interview data when we pass it an object that contains the interviewer 
+export function getInterview(state, interview) {
+  if (interview !== null) {
+    // create immutable copy and replace interviewer
+    const newInterview = {
+      ...interview,
+      interviewer: state.interviewers[interview.interviewer],
+    };
+    // console.log(newInterview);
+    return newInterview;
+  }
+  // fallback: return empty object
+  return null;
 }
