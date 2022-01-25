@@ -14,6 +14,7 @@ export default function DayListItem(props) {
   // format spots string
   const formatSpots = function (spots) {
     let spotsRemaining = `${spots} spots remaining`;
+    // eslint-disable-next-line default-case
     switch (spots) {
       case 0:
         spotsRemaining = `no spots remaining`;

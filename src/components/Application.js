@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DayList from "./DayList";
 import Appointment from "./Appointment";
+import { getAppointmentsForDay } from "helpers/selectors";
 
 import "components/Application.scss";
 
@@ -24,7 +25,7 @@ import "components/Application.scss";
   },
 ]; */
 // Test data for Appointment
-const appointments = [
+/* const appointments = [
   {
     id: 1,
     time: "12pm",
@@ -77,30 +78,44 @@ const appointments = [
       },
     },
   },
-];
+]; */
 
 export default function Application(props) {
   // combined state
   const [state, setState] = useState({
     day: "Monday",
     days: [],
-    // you may put the line below, but will have to remove/comment hardcoded appointments variable
     appointments: {},
   });
 
+  // list of appointments for that day
+  const dailyAppointments = getAppointmentsForDay(state, state.day);
+
   // Aliased actions for combined state
   const setDay = (day) => setState({ ...state, day });
-  const setDays = (days) => setState((prev) => ({ ...prev, days }));
+  // const setDays = (days) => setState((prev) => ({ ...prev, days }));
 
   // effect to fetch days from API
   useEffect(() => {
-    axios.get("/api/days").then((response) => {
-      // console.log(response.data);
-      setDays(response.data);
+    Promise.all([
+      axios.get("/api/days"),
+      axios.get("/api/appointments"),
+      axios.get("/api/interviewers"),
+    ]).then((all) => {
+      // console.log(all);
+      const [days, appointments, interviewers] = all;
+      // set combined state at once
+      setState((prev) => ({
+        ...prev,
+        days: days.data,
+        appointments: appointments.data,
+        interviewers: interviewers.data,
+      }));
     });
+
   }, []);
 
-  const AppointmentList = appointments.map((appointment) => (
+  const AppointmentList = dailyAppointments.map((appointment) => (
     <Appointment key={appointment.id} {...appointment} />
   ));
   AppointmentList.push(<Appointment key="last" time="5pm" />);
