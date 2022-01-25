@@ -80,13 +80,21 @@ const appointments = [
 ];
 
 export default function Application(props) {
-  // state
-  const [day, setDay] = useState("Monday");
-  const [days, setDays] = useState([]);
+  // combined state
+  const [state, setState] = useState({
+    day: "Monday",
+    days: [],
+    // you may put the line below, but will have to remove/comment hardcoded appointments variable
+    appointments: {},
+  });
+
+  // Aliased actions for combined state
+  const setDay = (day) => setState({ ...state, day });
+  const setDays = (days) => setState((prev) => ({ ...prev, days }));
 
   // effect to fetch days from API
-  useEffect(() => { 
-    axios.get("/api/days").then(response => {
+  useEffect(() => {
+    axios.get("/api/days").then((response) => {
       // console.log(response.data);
       setDays(response.data);
     });
@@ -107,7 +115,7 @@ export default function Application(props) {
         />
         <hr className="sidebar__separator sidebar--centered" />
         <nav className="sidebar__menu">
-          <DayList days={days} day={day} setDay={setDay} />
+          <DayList days={state.days} day={state.day} setDay={setDay} />
         </nav>
         <img
           className="sidebar__lhl sidebar--centered"
