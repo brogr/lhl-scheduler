@@ -119,6 +119,31 @@ export default function Application(props) {
         setState({ ...state, appointments });
 			}
     });
+  }
+  
+  // delete interview
+  function cancelInterview(id) {
+		// create a new appointment object by copying existing appointment to make sure that the object is not shared
+		const appointment = {
+			...state.appointments[id],
+			interview: null,
+		};
+		// update the appointments object with immutable pattern
+		const appointments = {
+			...state.appointments,
+			[id]: appointment,
+		};
+
+		// update DB & state
+		return axios
+			.delete("/api/appointments/" + id)
+			.then((response) => {
+				if (response.status === 204) {
+					// console.log("saved", response);
+					// update state: setState with the new state object
+					setState({ ...state, appointments });
+				}
+			});
 	}
 
 	// effect to fetch data from API
@@ -156,6 +181,7 @@ export default function Application(props) {
 				interview={interview}
 				interviewers={dailyInterviewers}
 				bookInterview={bookInterview}
+				cancelInterview={cancelInterview}
 			/>
 		);
 	});
