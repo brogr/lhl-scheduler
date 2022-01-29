@@ -11,7 +11,8 @@ function useVisualMode(initial) {
     if (replace) {
       const newHistory = [...history]; // immutable array pop...
       if (newHistory.length > 1) {
-        const prevMode = newHistory.pop();
+        //const prevMode = newHistory.pop();
+        newHistory.pop();
         setHistory(newHistory);
         setMode(newHistory[newHistory.length - 1]);
       }
@@ -26,7 +27,8 @@ function useVisualMode(initial) {
     // setMode(history.slice(0, history.length - 1));
     const newHistory = [...history]; // immutable array pop...
     if (newHistory.length > 1) {
-      const prevMode = newHistory.pop();
+      //const prevMode = newHistory.pop();
+      newHistory.pop();
       setHistory(newHistory);
       setMode(newHistory[newHistory.length - 1]);
     }
