@@ -4,6 +4,7 @@ import Show from "./Show";
 import Empty from "./Empty";
 import Form from "./Form";
 import Status from "./Status";
+import Confirm from "./Confirm";
 import useVisualMode from "hooks/useVisualMode";
 
 import "components/Appointment/styles.scss";
@@ -14,6 +15,7 @@ const SHOW = "SHOW";
 const CREATE = "CREATE";
 const SAVING = "SAVING";
 const DELETING = "DELETING";
+const CONFIRM = "CONFIRM";
 
 export default function Appointment(props) {
   // history handling
@@ -35,16 +37,29 @@ export default function Appointment(props) {
   
   // delete interview
   function cancel() {
+		transition(CONFIRM);
+  }
+  function cancelConfirmed() {
 		// transition to deleting before updating
-    transition(DELETING);
-    // cancel interview then transition to empty
-    props.cancelInterview(props.id).then((response) => { transition(EMPTY) });  // TODO: Check for error?
+		transition(DELETING);
+		// cancel interview then transition to empty
+		props.cancelInterview(props.id).then((response) => {
+			transition(EMPTY);
+		}); // TODO: Check for error?
 	}
+
 
   return (
 		<article className="appointment">
 			<Header time={props.time} />
 			{mode === EMPTY && <Empty onAdd={() => transition(CREATE)} />}
+			{mode === CONFIRM && (
+				<Confirm
+					message="Are you sure you would like to delete?"
+					onCancel={back}
+					onConfirm={cancelConfirmed}
+				/>
+			)}
 			{mode === SAVING && <Status message="Saving" />}
 			{mode === DELETING && <Status message="Deleting" />}
 			{mode === SHOW && (
