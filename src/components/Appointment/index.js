@@ -5,6 +5,7 @@ import Empty from "./Empty";
 import Form from "./Form";
 import Status from "./Status";
 import Confirm from "./Confirm";
+import Error from "./Error";
 import useVisualMode from "hooks/useVisualMode";
 
 import "components/Appointment/styles.scss";
@@ -17,6 +18,8 @@ const SAVING = "SAVING";
 const DELETING = "DELETING";
 const CONFIRM = "CONFIRM";
 const EDIT = "EDIT";
+const ERROR_SAVE = "ERROR_SAVE";
+const ERROR_DELETE = "ERROR_DELETE";
 
 export default function Appointment(props) {
   // history handling
@@ -33,7 +36,9 @@ export default function Appointment(props) {
     // transition to saving before updating
     transition(SAVING);
     // save interview then transition to show
-    props.bookInterview(props.id, interview).then((response) => { transition(SHOW) });  // TODO: Check for error?
+    props.bookInterview(props.id, interview)
+      .then(() => transition(SHOW))
+      .catch((error) => transition(ERROR_SAVE, true));
   }
   
   // delete interview
@@ -42,11 +47,11 @@ export default function Appointment(props) {
   }
   function cancelConfirmed() {
 		// transition to deleting before updating
-		transition(DELETING);
+		transition(DELETING, true);
 		// cancel interview then transition to empty
-		props.cancelInterview(props.id).then((response) => {
-			transition(EMPTY);
-		}); // TODO: Check for error?
+    props.cancelInterview(props.id)
+      .then(() => transition(EMPTY))
+      .catch((error) => transition(ERROR_DELETE, true));
   }
   
   // edit interview
@@ -72,8 +77,8 @@ export default function Appointment(props) {
 				<Show
 					student={props.interview.student}
 					interviewer={props.interview.interviewer}
-          onDelete={cancel}
-          onEdit={edit}
+					onDelete={cancel}
+					onEdit={edit}
 				/>
 			)}
 			{mode === EDIT && (
@@ -87,6 +92,12 @@ export default function Appointment(props) {
 			)}
 			{mode === CREATE && (
 				<Form interviewers={props.interviewers} onCancel={back} onSave={save} />
+			)}
+			{mode === ERROR_DELETE && (
+				<Error message="An error occured: delete failed" onClose={back} />
+			)}
+			{mode === ERROR_SAVE && (
+				<Error message="An error occured: save failed" onClose={back} />
 			)}
 		</article>
 	);
