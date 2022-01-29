@@ -99,7 +99,7 @@ export default function Application(props) {
 
 	// update the local state when we book an interview
 	function bookInterview(id, interview) {
-		console.log(id, interview);
+		// console.log(id, interview);
 		// create a new appointment object by copying existing appointment to make sure that the object is not shared
 		const appointment = {
 			...state.appointments[id],
@@ -110,8 +110,15 @@ export default function Application(props) {
 			...state.appointments,
 			[id]: appointment,
 		};
-		// update state: setState with the new state object
-    setState({ ...state, appointments });
+		
+    // update DB & state
+    return axios.put("/api/appointments/" + id, { interview }).then(response => {
+      if (response.status === 204) {
+				// console.log("saved", response);
+				// update state: setState with the new state object
+        setState({ ...state, appointments });
+			}
+    });
 	}
 
 	// effect to fetch data from API

@@ -3,6 +3,7 @@ import Header from "./Header";
 import Show from "./Show";
 import Empty from "./Empty";
 import Form from "./Form";
+import Status from "./Status";
 import useVisualMode from "hooks/useVisualMode";
 
 import "components/Appointment/styles.scss";
@@ -11,6 +12,7 @@ import "components/Appointment/styles.scss";
 const EMPTY = "EMPTY";
 const SHOW = "SHOW";
 const CREATE = "CREATE";
+const SAVING = "SAVING";
 
 export default function Appointment(props) {
   // history handling
@@ -23,14 +25,17 @@ export default function Appointment(props) {
 			student: name,
 			interviewer,
     };
-    props.bookInterview(props.id, interview);
-    transition(SHOW);
+    // transition to saving before updating
+    transition(SAVING);
+    // save interview then transition to show
+    props.bookInterview(props.id, interview).then((response) => { transition(SHOW) });  // TODO: Check for error?
 	}
 
   return (
 		<article className="appointment">
 			<Header time={props.time} />
 			{mode === EMPTY && <Empty onAdd={() => transition(CREATE)} />}
+			{mode === SAVING && <Status message="Saving..." />}
 			{mode === SHOW && (
 				<Show
 					student={props.interview.student}
