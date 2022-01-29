@@ -85,75 +85,94 @@ import "components/Application.scss";
 ]; */
 
 export default function Application(props) {
-  // combined state
-  const [state, setState] = useState({
-    day: "Monday",
-    days: [],
-    appointments: {},
-    interviewers: {},
-  });
+	// combined state
+	const [state, setState] = useState({
+		day: "Monday",
+		days: [],
+		appointments: {},
+		interviewers: {},
+	});
 
-  // Aliased actions for combined state
-  const setDay = (day) => setState({ ...state, day });
-  // const setDays = (days) => setState((prev) => ({ ...prev, days }));
+	// Aliased actions for combined state
+	const setDay = (day) => setState({ ...state, day });
+	// const setDays = (days) => setState((prev) => ({ ...prev, days }));
 
-  // effect to fetch days from API
-  useEffect(() => {
-    Promise.all([
-      axios.get("/api/days"),
-      axios.get("/api/appointments"),
-      axios.get("/api/interviewers"),
-    ]).then((all) => {
-      // console.log(all);
-      const [days, appointments, interviewers] = all;
-      // set combined state at once
-      setState((prev) => ({
-        ...prev,
-        days: days.data,
-        appointments: appointments.data,
-        interviewers: interviewers.data,
-      }));
-    });
-  }, []);
+	// update the local state when we book an interview
+	function bookInterview(id, interview) {
+		console.log(id, interview);
+		// create a new appointment object by copying existing appointment to make sure that the object is not shared
+		const appointment = {
+			...state.appointments[id],
+			interview: { ...interview },
+		};
+		// update the appointments object with immutable pattern
+		const appointments = {
+			...state.appointments,
+			[id]: appointment,
+		};
+		// update state: setState with the new state object
+    setState({ ...state, appointments });
+	}
 
-  // list of interviewers for this day
-  const dailyInterviewers = getInterviewersForDay(state, state.day);
+	// effect to fetch data from API
+	useEffect(() => {
+		Promise.all([
+			axios.get("/api/days"),
+			axios.get("/api/appointments"),
+			axios.get("/api/interviewers"),
+		]).then((all) => {
+			// console.log(all);
+			const [days, appointments, interviewers] = all;
+			// set combined state at once
+			setState((prev) => ({
+				...prev,
+				days: days.data,
+				appointments: appointments.data,
+				interviewers: interviewers.data,
+			}));
+		});
+	}, []);
 
-  // list of appointments for this day
-  const dailyAppointments = getAppointmentsForDay(state, state.day);
-  // parse list of appointment
-  const AppointmentList = dailyAppointments.map((appointment) => {
-    const interview = getInterview(state, appointment.interview);
-    return (
-      <Appointment
-        key={appointment.id}
-        {...appointment}
-        interview={interview}
-        interviewers={dailyInterviewers}
-      />
-    );
-  });
-  AppointmentList.push(<Appointment key="last" time="5pm" />);
+	// list of interviewers for this day
+	const dailyInterviewers = getInterviewersForDay(state, state.day);
 
-  return (
-    <main className="layout">
-      <section className="sidebar">
-        <img
-          className="sidebar--centered"
-          src="images/logo.png"
-          alt="Interview Scheduler"
-        />
-        <hr className="sidebar__separator sidebar--centered" />
-        <nav className="sidebar__menu">
-          <DayList days={state.days} day={state.day} setDay={setDay} />
-        </nav>
-        <img
-          className="sidebar__lhl sidebar--centered"
-          src="images/lhl.png"
-          alt="Lighthouse Labs"
-        />
-      </section>
-      <section className="schedule">{AppointmentList}</section>
-    </main>
-  );
+	// list of appointments for this day
+	const dailyAppointments = getAppointmentsForDay(state, state.day);
+
+	// parse list of appointment
+	const AppointmentList = dailyAppointments.map((appointment) => {
+		const interview = getInterview(state, appointment.interview);
+		return (
+			<Appointment
+				key={appointment.id}
+				{...appointment}
+				interview={interview}
+				interviewers={dailyInterviewers}
+				bookInterview={bookInterview}
+			/>
+		);
+	});
+	AppointmentList.push(<Appointment key="last" time="5pm" />);
+
+	return (
+		<main className="layout">
+			<section className="sidebar">
+				<img
+					className="sidebar--centered"
+					src="images/logo.png"
+					alt="Interview Scheduler"
+				/>
+				<hr className="sidebar__separator sidebar--centered" />
+				<nav className="sidebar__menu">
+					<DayList days={state.days} day={state.day} setDay={setDay} />
+				</nav>
+				<img
+					className="sidebar__lhl sidebar--centered"
+					src="images/lhl.png"
+					alt="Lighthouse Labs"
+				/>
+			</section>
+			<section className="schedule">{AppointmentList}</section>
+		</main>
+	);
 }
