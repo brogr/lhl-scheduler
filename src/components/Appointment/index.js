@@ -16,6 +16,7 @@ const CREATE = "CREATE";
 const SAVING = "SAVING";
 const DELETING = "DELETING";
 const CONFIRM = "CONFIRM";
+const EDIT = "EDIT";
 
 export default function Appointment(props) {
   // history handling
@@ -46,7 +47,12 @@ export default function Appointment(props) {
 		props.cancelInterview(props.id).then((response) => {
 			transition(EMPTY);
 		}); // TODO: Check for error?
-	}
+  }
+  
+  // edit interview
+  function edit() {
+    transition(EDIT);
+  }
 
 
   return (
@@ -66,7 +72,17 @@ export default function Appointment(props) {
 				<Show
 					student={props.interview.student}
 					interviewer={props.interview.interviewer}
-					onDelete={cancel}
+          onDelete={cancel}
+          onEdit={edit}
+				/>
+			)}
+			{mode === EDIT && (
+				<Form
+					name={props.interview.student}
+					interviewer={props.interview.interviewer.id}
+					interviewers={props.interviewers}
+					onCancel={back}
+					onSave={save}
 				/>
 			)}
 			{mode === CREATE && (
