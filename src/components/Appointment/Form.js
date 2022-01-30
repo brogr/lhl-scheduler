@@ -14,6 +14,11 @@ export default function Form(props) {
     reset();
     props.onCancel();
   }
+  const save = function () {
+    if (interviewer) {  // validate that interviewer is selected
+      props.onSave(name, interviewer);
+    }
+  }
 
   return (
     <main className="appointment__card appointment__card--create">
@@ -39,7 +44,7 @@ export default function Form(props) {
           <Button danger onClick={cancel}>
             Cancel
           </Button>
-          <Button confirm onClick={() => props.onSave(name, interviewer)}>
+          <Button confirm onClick={save}>
             Save
           </Button>
         </section>
