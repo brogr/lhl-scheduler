@@ -13,6 +13,9 @@ import {
 	prettyDOM,
 } from "@testing-library/react";
 
+// For simulating error we need access to axios mock so that we can override its functions
+import axios from "axios";
+    
 import Application from "components/Application";
 
 afterEach(cleanup);
@@ -37,7 +40,7 @@ describe("Application", () => {
 		expect(getByText("Leopold Silvers")).toBeInTheDocument();
 	});
 
-  it("loads data, books an interview and reduces the spots remaining for Monday by 1", async () => {
+	it("loads data, books an interview and reduces the spots remaining for Monday by 1", async () => {
 		const { container, debug } = render(<Application />);
 
 		// wait for data
@@ -69,8 +72,8 @@ describe("Application", () => {
 		// console.log(prettyDOM(appointment));
 	});
 
-  it("loads data, cancels an interview and increases the spots remaining for Monday by 1", async () => {
-    const name = "Archie Cohen";
+	it("loads data, cancels an interview and increases the spots remaining for Monday by 1", async () => {
+		const name = "Archie Cohen";
 
 		// 1. Render the Application.
 		const { container } = render(<Application />);
@@ -86,30 +89,29 @@ describe("Application", () => {
 		fireEvent.click(getByAltText(appointment, "Delete"));
 
 		// 4. Check that the element with the text "Are you sure you would like to delete?" is displayed.
-    expect(
+		expect(
 			getByText(appointment, "Are you sure you would like to delete?")
 		).toBeInTheDocument();
-    
+
 		// 5. Click the "Confirm" button.
-    fireEvent.click(getByText(appointment, "Confirm"));
+		fireEvent.click(getByText(appointment, "Confirm"));
 
 		// 7. Check that the element with the text "Deleting" is displayed.
-    expect(getByText(appointment, "Deleting")).toBeInTheDocument();
+		expect(getByText(appointment, "Deleting")).toBeInTheDocument();
 
 		// 8.Wait until the element with empty appointment is displayed
-    await waitForElement(() => getByAltText(appointment, "Add"));
+		await waitForElement(() => getByAltText(appointment, "Add"));
 
 		// 9. Check that the DayListItem with the text "Monday" also has the text "2 spots remaining".
-    const day = getAllByTestId(container, "day").find((day) =>
+		const day = getAllByTestId(container, "day").find((day) =>
 			queryByText(day, "Monday")
 		);
-    expect(getByText(day, "2 spots remaining")).toBeInTheDocument();
-    
-  });
-  
-  it("loads data, edits an interview and keeps the spots remaining for Monday the same", async () => {
-    const name = "Archie Cohen";
-    const newName = "Lydia Miller-Jones";
+		expect(getByText(day, "2 spots remaining")).toBeInTheDocument();
+	});
+
+	it("loads data, edits an interview and keeps the spots remaining for Monday the same", async () => {
+		const name = "Archie Cohen";
+		const newName = "Lydia Miller-Jones";
 
 		// 1. Render the Application.
 		const { container } = render(<Application />);
@@ -125,7 +127,7 @@ describe("Application", () => {
 		fireEvent.click(getByAltText(appointment, "Edit"));
 
 		// 4. Change the student name and interviewer
-    fireEvent.change(getByPlaceholderText(appointment, /enter student name/i), {
+		fireEvent.change(getByPlaceholderText(appointment, /enter student name/i), {
 			target: { value: newName },
 		});
 		fireEvent.click(getByAltText(appointment, "Sylvia Palmer"));
@@ -146,4 +148,102 @@ describe("Application", () => {
 		expect(getByText(day, "1 spot remaining")).toBeInTheDocument();
 	});
 
+  it("shows the save error when failing to save an appointment", async () => {
+		// For simulating error we need to mock our axios mock
+		axios.put.mockRejectedValueOnce();
+
+		const name = "Archie Cohen";
+		const newName = "Lydia Miller-Jones";
+
+		// 1. Render the Application.
+		const { container } = render(<Application />);
+
+		// 2. Wait until the text "Archie Cohen" is displayed.
+		await waitForElement(() => getByText(container, name));
+
+		// 3. Find Archie Cohen's appointment, click the "Edit" button.
+		const appointment = getAllByTestId(container, "appointment").find(
+			(appointment) => queryByText(appointment, name)
+		);
+		// console.log(prettyDOM(appointment));
+		fireEvent.click(getByAltText(appointment, "Edit"));
+
+		// 4. Change the student name and interviewer
+		fireEvent.change(getByPlaceholderText(appointment, /enter student name/i), {
+			target: { value: newName },
+		});
+		fireEvent.click(getByAltText(appointment, "Sylvia Palmer"));
+
+		// 5. Click the "Save" button.
+		fireEvent.click(getByText(appointment, "Save"));
+
+		// 6. Check that the element with the text "Saving" is displayed.
+		expect(getByText(appointment, "Saving")).toBeInTheDocument();
+
+		// 7. Wait for the Error message
+		await waitForElement(() => queryByText(appointment, "Error"));
+
+		// 8. Click the "Close" button.
+		fireEvent.click(getByAltText(appointment, "Close"));
+
+		// 9. Wait until the element displayed again with old name
+		await waitForElement(() => getByText(appointment, name)).then(() => {
+			expect(getByText(appointment, name)).toBeInTheDocument();
+		});
+
+		// 10. Check that the DayListItem with the text "Monday" also has the text "1 spot remaining".
+		const day = getAllByTestId(container, "day").find((day) =>
+			queryByText(day, "Monday")
+		);
+		expect(getByText(day, "1 spot remaining")).toBeInTheDocument();
+	});
+  
+  it("shows the delete error when failing to delete an existing appointment", async () => {
+		// For simulating error we need to mock our axios mock
+		axios.delete.mockRejectedValueOnce();
+
+		const name = "Archie Cohen";
+
+		// 1. Render the Application.
+		const { container } = render(<Application />);
+
+		// 2. Wait until the text "Archie Cohen" is displayed.
+		await waitForElement(() => getByText(container, name));
+
+		// 3. Find Archie Cohen's appointment, click the "Delete" button.
+		const appointment = getAllByTestId(container, "appointment").find(
+			(appointment) => queryByText(appointment, name)
+		);
+		// console.log(prettyDOM(appointment));
+		fireEvent.click(getByAltText(appointment, "Delete"));
+
+		// 4. Check that the element with the text "Are you sure you would like to delete?" is displayed.
+		expect(
+			getByText(appointment, "Are you sure you would like to delete?")
+		).toBeInTheDocument();
+
+		// 5. Click the "Confirm" button.
+		fireEvent.click(getByText(appointment, "Confirm"));
+
+		// 7. Check that the element with the text "Deleting" is displayed.
+		expect(getByText(appointment, "Deleting")).toBeInTheDocument();
+
+		// 8. Wait for the Error message
+		await waitForElement(() => queryByText(appointment, "Error"));
+
+		// 9. Click the "Close" button.
+		fireEvent.click(getByAltText(appointment, "Close"));
+
+		// 10. Wait until the element displayed again with old name
+		await waitForElement(() => getByText(appointment, name)).then(() => {
+			expect(getByText(appointment, name)).toBeInTheDocument();
+		});
+
+		// 11. Check that the DayListItem with the text "Monday" also has the text "1 spot remaining".
+		const day = getAllByTestId(container, "day").find((day) =>
+			queryByText(day, "Monday")
+		);
+		expect(getByText(day, "1 spot remaining")).toBeInTheDocument();
+	});
+  
 });
