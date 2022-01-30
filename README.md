@@ -14,7 +14,7 @@ Developed as part of the Lighthouse Labs' React Frontend course.
 
 !["Edit an appointment"](https://github.com/brogr/lhl-scheduler/raw/master/docs/edit.png)
 
-### Cancel appointment
+### Cancel an appointment
 
 !["Cancel an appointment"](https://github.com/brogr/lhl-scheduler/raw/master/docs/delete.png)
 
