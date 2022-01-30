@@ -52,7 +52,6 @@ function useApplicationData() {
 			axios.get("/api/appointments"),
 			axios.get("/api/interviewers"),
 		]).then((all) => {
-			// console.log(all);
 			const [days, appointments, interviewers] = all;
 			// dispatch to update reducer state
 			dispatch({
@@ -76,13 +75,11 @@ function useApplicationData() {
     
     // receive
     webSocket.onmessage = function (event) {
-      // console.log("Message Received:", event.data);
       const message = JSON.parse(event.data);
       
       // eslint-disable-next-line default-case
       switch (message.type) {
         case SET_INTERVIEW: {
-          // console.log(SET_INTERVIEW);
           // dispatch to update reducer state
           dispatch(message);
 					break;

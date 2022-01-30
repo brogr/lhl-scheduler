@@ -42,8 +42,7 @@ export default function reducer(state, action) {
 // receives updated/new appointments to calculate spots remaining (instead of relying on outdated state)
 function updateSpots(state, appointments) {
 	// 0. create new days array to update spots
-	// const newDays = [...state.days]; // problem: shallow copy only because multi-dimensional array
-	const newDays = Array.from(state.days); // deep clone
+	const newDays = Array.from(state.days); // deep clone, instead of "const newDays = [...state.days];" which creates shallow copy only because multi-dimensional array
 	// 1. get the day object
 	const dayObj = newDays.find((day) => day.name === state.day);
 	// 2. count the day's appointments without interviews to determine spots available
@@ -52,6 +51,5 @@ function updateSpots(state, appointments) {
 	).length;
 	// 3. update spots
 	dayObj.spots = spots;
-	// const newDay = {...dayObj, spots}
-	return newDays;
+	return newDays; // don't need "const newDay = {...dayObj, spots}" because we created deep clone newDays 
 }
