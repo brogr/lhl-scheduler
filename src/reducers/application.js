@@ -50,7 +50,6 @@ function updateSpots(state, appointments) {
 	const spots = dayObj.appointments.filter(
 		(appId) => appointments[appId].interview === null
 	).length;
-	// console.log(spots);
 	// 3. update spots
 	dayObj.spots = spots;
 	// const newDay = {...dayObj, spots}
