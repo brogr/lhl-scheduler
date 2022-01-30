@@ -1,4 +1,8 @@
-# Interview Scheduler
+# LHL Interview Scheduler
+
+React application that allows users to book and cancel interviews. Combine a concise API with a WebSocket server to create a realtime experience.
+
+Developed as part of the Lighthouse Labs' React Frontend course.
 
 ## Setup
 
@@ -20,4 +24,10 @@ npm test
 
 ```sh
 npm run storybook
+```
+
+## Running Cypress
+
+```sh
+npm run cypress
 ```
