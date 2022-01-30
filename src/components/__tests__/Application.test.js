@@ -8,6 +8,7 @@ import {
   getAllByTestId,
   getByAltText,
   getByPlaceholderText,
+  queryByText,
 	prettyDOM,
 } from "@testing-library/react";
 
@@ -36,23 +37,35 @@ describe("Application", () => {
 	});
 
   it("loads data, books an interview and reduces the spots remaining for Monday by 1", async () => {
-		const { container } = render(<Application />);
+		const { container, debug } = render(<Application />);
 
+		// wait for data
 		await waitForElement(() => getByText(container, "Archie Cohen"));
 
+		// find first appointment
 		const appointments = getAllByTestId(container, "appointment");
 		const appointment = appointments[0];
 
+		// add appointment and save
 		fireEvent.click(getByAltText(appointment, "Add"));
-
 		fireEvent.change(getByPlaceholderText(appointment, /enter student name/i), {
 			target: { value: "Lydia Miller-Jones" },
 		});
 		fireEvent.click(getByAltText(appointment, "Sylvia Palmer"));
-
 		fireEvent.click(getByText(appointment, "Save"));
+		// check for "Saving" message / state
+		expect(getByText(appointment, "Saving")).toBeInTheDocument();
+		// wait after saving, check for interviewer's name
+		await waitForElement(() => queryByText(appointment, "Lydia Miller-Jones"));
 
-		console.log(prettyDOM(appointment));
+		// find Monday, check for "no spots remaining"
+		const day = getAllByTestId(container, "day").find((day) =>
+			queryByText(day, "Monday")
+		);
+		expect(getByText(day, "no spots remaining")).toBeInTheDocument();
+
+		// debug();
+		// console.log(prettyDOM(appointment));
 	});
 
 
