@@ -4,6 +4,20 @@ React application that allows users to book and cancel interviews. Combine a con
 
 Developed as part of the Lighthouse Labs' React Frontend course.
 
+## Screenshots
+
+### List the appointments per day
+
+!["List the appointments per day"](https://github.com/brogr/lhl-scheduler/raw/master/docs/appointments.png)
+
+### Edit an appointment
+
+!["Edit an appointment"](https://github.com/brogr/lhl-scheduler/raw/master/docs/edit.png)
+
+### Cancel an appointment
+
+!["Cancel an appointment"](https://github.com/brogr/lhl-scheduler/raw/master/docs/delete.png)
+
 ## Setup
 
 Install dependencies with `npm install`.
