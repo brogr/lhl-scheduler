@@ -1,4 +1,4 @@
-import { React, useEffect, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import axios from "axios";
 
 const SET_DAY = "SET_DAY";
@@ -62,11 +62,11 @@ function updateSpots(state, appointments) {
 
 
 function useApplicationData() {
-  // url for appointments api
-  const API_APPOINTMENTS_URL = "/api/appointments/";
+	// url for appointments api
+	const API_APPOINTMENTS_URL = "/api/appointments/";
 
-  // reducer (instead of complex useState)
-  const [state, dispatch] = useReducer(reducer, {
+	// reducer (instead of complex useState)
+	const [state, dispatch] = useReducer(reducer, {
 		day: "Monday",
 		days: [],
 		appointments: {},
@@ -74,7 +74,7 @@ function useApplicationData() {
 	});
 
 	// Aliased actions for combined state
-  const setDay = (day) => dispatch({ type: SET_DAY, day });
+	const setDay = (day) => dispatch({ type: SET_DAY, day });
 
 	// update the local state when we book an interview
 	function bookInterview(id, interview) {
@@ -118,6 +118,39 @@ function useApplicationData() {
 			});
 		});
 	}, []);
+
+	// effect to synchronize state via WebSocket
+  useEffect(() => {
+    // open connection
+    const webSocket = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL);
+
+    // send
+    webSocket.onopen = function (event) {
+			// webSocket.send("ping");
+    };
+    
+    // receive
+    webSocket.onmessage = function (event) {
+      // console.log("Message Received:", event.data);
+      const message = JSON.parse(event.data);
+      
+      // eslint-disable-next-line default-case
+      switch (message.type) {
+        case SET_INTERVIEW: {
+          // console.log(SET_INTERVIEW);
+          // dispatch to update reducer state
+          dispatch(message);
+					break;
+				}
+			}
+		};
+
+    // cleanup: close connection
+    return () => {
+      webSocket.close();
+    }
+  }, []);
+
 
 	return { state, setDay, bookInterview, cancelInterview };
 }
